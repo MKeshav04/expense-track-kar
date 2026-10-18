@@ -1,5 +1,5 @@
-/* Kharcha: dark warm paper, cream ink outlines, hard shadows, a colour per category.
-   Always dark, whatever the phone's setting. */
+/* Kharcha: warm paper, thick ink outlines, hard shadows, a colour per category.
+   Dark by default; the ☀️/🌙 toggle sets data-theme="light" on <html>. */
 
 :root {
   --paper: #17140f;
@@ -18,6 +18,22 @@
   --font: 'Bricolage Grotesque Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
   color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --paper: #fff4e0;
+  --card: #fffdf8;
+  --soft: #f6e9d0;
+  --ink: #1b1712;
+  --muted: #6f6656;
+  --line: #1b1712;
+  --shadow: #1b1712;
+  --pop: #ff5a36;
+  --pop-text: #ffffff;
+  --sun: #ffd23f;
+  --up: #d92d20;
+  --down: #12864a;
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -93,6 +109,19 @@ h2 { font-size: 1.05rem; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.
   box-shadow: 2px 2px 0 var(--shadow);
 }
 .streak.cold { background: var(--soft); color: var(--muted); }
+.brand-right { display: flex; align-items: center; gap: 10px; }
+.theme-btn {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--card);
+  font-size: 1.05rem;
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+.theme-btn:active { transform: translate(2px, 2px); box-shadow: none; }
 
 /* Today hero */
 .hero {

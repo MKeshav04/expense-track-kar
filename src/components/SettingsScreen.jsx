@@ -73,7 +73,7 @@ function CategoryRow({ cat, categories, index, count, showToast }) {
   )
 }
 
-export default function SettingsScreen({ categories, showToast }) {
+export default function SettingsScreen({ categories, showToast, theme, toggleTheme }) {
   const [newName, setNewName] = useState('')
   const [newEmoji, setNewEmoji] = useState('🏷️')
   const [persisted, setPersisted] = useState(null)
@@ -115,6 +115,16 @@ export default function SettingsScreen({ categories, showToast }) {
 
   return (
     <>
+      <section className="card">
+        <h2>Look</h2>
+        <div className="row">
+          <span className="grow">{theme === 'dark' ? '🌙 Dark mode' : '☀️ Light mode'}</span>
+          <button className="btn small" onClick={toggleTheme}>
+            Switch to {theme === 'dark' ? 'light' : 'dark'}
+          </button>
+        </div>
+      </section>
+
       <section className="card">
         <h2>Categories</h2>
         <p className="muted small">

@@ -5,6 +5,13 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# Refresh fix: any path that isn't a real file loads the app instead of a 404.
+# Safe for /api/ai, because Netlify runs functions before redirect rules.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
 # The service worker must always be re-checked so updates reach installed phones.
 [[headers]]
   for = "/sw.js"

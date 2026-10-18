@@ -6,6 +6,7 @@ import SettingsScreen from './components/SettingsScreen.jsx'
 import SummaryScreen from './components/SummaryScreen.jsx'
 import { suggestMissing } from './lib/ai.js'
 import { db, requestPersistence } from './lib/db.js'
+import { getTheme, setTheme } from './lib/theme.js'
 
 const TABS = [
   { id: 'add', label: 'Add', icon: '✍️' },
@@ -13,16 +14,10 @@ const TABS = [
   { id: 'settings', label: 'Settings', icon: '⚙️' },
 ]
 
-function savedTab() {
-  try {
-    return localStorage.getItem('tab') || 'add'
-  } catch {
-    return 'add'
-  }
-}
-
 export default function App() {
-  const [tab, setTab] = useState(savedTab)
+  // Always open on Add: logging should be one tap away.
+  const [tab, setTab] = useState('add')
+  const [theme, setThemeState] = useState(getTheme)
   const [editing, setEditing] = useState(null)
   const [toast, setToast] = useState(null)
   const toastTimer = useRef()
@@ -37,13 +32,12 @@ export default function App() {
     toastTimer.current = setTimeout(() => setToast(null), undo ? 5000 : 2500)
   }, [])
 
-  const go = (id) => {
-    setTab(id)
-    try {
-      localStorage.setItem('tab', id)
-    } catch {
-      /* private mode */
-    }
+  const go = (id) => setTab(id)
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    setThemeState(next)
   }
 
   useEffect(() => {
@@ -61,7 +55,7 @@ export default function App() {
 
   if (!categories.length) return <div className="loading">Loading…</div>
 
-  const shared = { categories, keywords, onEdit: setEditing, showToast, go }
+  const shared = { categories, keywords, onEdit: setEditing, showToast, go, theme, toggleTheme }
 
   return (
     <div className="app">

@@ -6,7 +6,16 @@
     <title>Kharcha</title>
     <meta name="description" content="A simple expense tracker. Type 150 food and you're done." />
     <meta name="theme-color" content="#17140f" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="dark light" />
+    <script>
+      // Apply the saved light/dark choice before anything is drawn (dark is the default).
+      try {
+        if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.dataset.theme = 'light'
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#fff4e0')
+        }
+      } catch (e) {}
+    </script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="Kharcha" />

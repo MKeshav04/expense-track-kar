@@ -18,7 +18,7 @@ function mood(todayTotal, usual, noSpendToday) {
   return 'Pricier than usual today 👀'
 }
 
-export default function AddScreen({ categories, keywords, onEdit, showToast, go }) {
+export default function AddScreen({ categories, keywords, onEdit, showToast, go, theme, toggleTheme }) {
   const [text, setText] = useState('')
   const [error, setError] = useState(null)
   const [days, setDays] = useState(30)
@@ -113,8 +113,17 @@ export default function AddScreen({ categories, keywords, onEdit, showToast, go 
         <span className="wordmark">
           <span className="coin" aria-hidden>₹</span>kharcha
         </span>
-        <span className={streakDays ? 'streak' : 'streak cold'} title="Days in a row you've logged">
-          🔥 {streakDays} {streakDays === 1 ? 'day' : 'days'}
+        <span className="brand-right">
+          <span className={streakDays ? 'streak' : 'streak cold'} title="Days in a row you've logged">
+            🔥 {streakDays} {streakDays === 1 ? 'day' : 'days'}
+          </span>
+          <button
+            className="theme-btn"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
         </span>
       </header>
 

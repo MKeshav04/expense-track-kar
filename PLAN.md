@@ -69,7 +69,7 @@ cloud sync, multi-currency, CI, rate-limit storage, install guide with pictures.
 - React + Vite, plain CSS, Dexie (IndexedDB), vite-plugin-pwa, Vitest for parser tests.
 - `api/ai.js` — server-side AI handler that calls Groq (or Claude). Served at `/api/ai` by
   `netlify/functions/ai.mjs` on Netlify and by the Vite dev server locally.
-- Always dark theme. Font: Bricolage Grotesque, bundled so it works offline.
+- Dark theme by default, ☀️/🌙 toggle for light (remembered per phone). Font: Bricolage Grotesque, bundled so it works offline.
 - Money stored as whole paise (integers). Dates stored as local `YYYY-MM-DD`.
 
 ## Status (Oct 19, 2026)
