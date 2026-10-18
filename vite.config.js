@@ -58,8 +58,23 @@ export default defineConfig(({ mode }) => {
           shortcuts: [{ name: 'Add expense', short_name: 'Add', url: '/' }],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-          navigateFallbackDenylist: [/^\/api\//],
+          // The page itself is NOT precached: a precached index.html only refreshes when the
+          // build changes, so server-side changes (e.g. Netlify settings) never reached phones.
+          globPatterns: ['**/*.{js,css,svg,png,woff2}'],
+          navigateFallback: null,
+          runtimeCaching: [
+            {
+              // Online: always the latest page. Offline: the last copy we saw.
+              urlPattern: ({ request, url }) =>
+                request.mode === 'navigate' || (url.origin === self.location.origin && url.pathname === '/'),
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'pages',
+                networkTimeoutSeconds: 4,
+                matchOptions: { ignoreVary: true, ignoreSearch: true },
+              },
+            },
+          ],
         },
       }),
     ],
