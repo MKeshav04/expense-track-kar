@@ -8,7 +8,7 @@ holding anyone's data.
 **▶ Open the app: https://expense-track-kar.netlify.app** — then install it to your home screen
 ([how](#install-on-a-phone)).
 
-- **Code:** https://github.com/MKeshav04/expense-tracker
+- **Code:** https://github.com/MKeshav04/expense-track-kar
 - **Hosting:** Netlify (auto-deploys from `main`)
 - **Original planning notes:** [PLAN.md](PLAN.md) and `Expense Tracker App — Build Plan.pdf`
 
@@ -252,7 +252,7 @@ changing them makes every phone lose its entries and old backups stop restoring.
 
 ## Deploy on Netlify
 
-1. Netlify → **Add new project → Import an existing project → GitHub → expense-tracker**
+1. Netlify → **Add new project → Import an existing project → GitHub → expense-track-kar**
    (live at https://expense-track-kar.netlify.app).
    Build settings come from [netlify.toml](netlify.toml) (`npm run build`, publish `dist`, Node 22).
 2. **Site configuration → Environment variables:** add `GROQ_API_KEY` (no quotes). Redeploy.
