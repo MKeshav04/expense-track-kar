@@ -53,9 +53,15 @@ On Groq's free tier this costs nothing at 3 people's usage.
 | Share | Send the month summary as text to WhatsApp. |
 | Backup | Export JSON + CSV, import JSON, 30-day reminder. |
 | Install + offline | Home-screen app, works with no internet (AI needs internet). |
-| Dark mode | Follows the phone. |
+| Look | Dark by default, ☀️/🌙 toggle for light. Colour per category. |
+| Streak + no-spend day | 🔥 days in a row logged; "Spent nothing?" keeps the streak alive. |
+| Mood line + fun facts | Today vs your usual day; most repeated buy, biggest day, no-spend days. |
 
 ## Later, only if actually wanted
+Best candidates first:
+- One monthly budget with "₹X left · ₹Y/day safe to spend" on the Today card.
+- Split in the input: `1200 dinner /3` saves ₹400 (your share).
+- Search across all entries ("zomato": how often, how much).
 - Monthly budgets per category.
 - Recurring entries (rent, subscriptions).
 - Android "share to app" from GPay/PhonePe receipts.
@@ -73,9 +79,10 @@ cloud sync, multi-currency, CI, rate-limit storage, install guide with pictures.
 - Money stored as whole paise (integers). Dates stored as local `YYYY-MM-DD`.
 
 ## Status (Oct 19, 2026)
-v0 is built and tested in a phone-sized browser: adding, editing, deleting with undo, keyword learning,
-streaks, summaries, settings, and both AI features (with a Groq key) all work.
-The app is called **Kharcha**; the name is set in `index.html` and `vite.config.js`.
+v0 is **live** at https://expense-track-kar.netlify.app (code: https://github.com/MKeshav04/expense-track-kar).
+Adding, editing, deleting with undo, keyword learning, streaks, summaries, settings, backup, offline,
+and both AI features (Groq) all work, including on the live site.
+The app is called **Kharcha** (full name "Kharcha — Expense Track-kar"). Full details: [README.md](README.md).
 
 ## Running it
 ```

@@ -22,7 +22,7 @@ holding anyone's data.
 5. [The AI parts](#the-ai-parts)
 6. [Where your data lives](#where-your-data-lives)
 7. [Install on a phone](#install-on-a-phone)
-8. [Updates and offline](#updates-and-offline)
+8. [Updates and offline](#updates-and-offline) — including how to add features without anyone reinstalling
 9. [Run it on your computer](#run-it-on-your-computer)
 10. [Deploy on Netlify](#deploy-on-netlify)
 11. [Project structure](#project-structure)
@@ -207,6 +207,24 @@ app keep separate data.
   version. Fully close and reopen once (sometimes twice) to see it. No reinstall, data untouched.
 - **Exception — name or icon changes:** Android picks them up on its own within about a day;
   iPhone needs the app removed and re-added (**back up first**, removing it deletes its data).
+
+### Adding features without anyone reinstalling
+
+New features, screens, styles, parser rules and AI changes all arrive by themselves after a push.
+Keep it that way by following these rules:
+
+| Rule | Why |
+|---|---|
+| **Never rename** `'expense-tracker'` in `src/lib/db.js` / `src/lib/backup.js` | That's where every phone's data lives; renaming = empty app, old backups won't restore |
+| **New data fields:** just start writing them; old entries without the field must still work | Saved entries are never rewritten on their own |
+| **New table or index:** add `db.version(2).stores({...})` (keep `version(1)`) plus an `.upgrade()` if old rows need filling in | Dexie upgrades each phone's database in place on next open, data kept |
+| **Never delete a table or remove version(1)** | Phones on the old version could lose data |
+| **Keep the Netlify link the same** (`expense-track-kar.netlify.app`) | The installed app belongs to that address; a new address = a new, empty app |
+| **Avoid changing `name`, `short_name`, icons** | iPhone never updates them without a reinstall |
+| **Test with real data before pushing:** back up from your phone, `npm run dev`, restore the backup there, check | Catches anything that would break existing entries |
+
+Things that do need a one-time tap from each person (not a reinstall): new permissions such as
+notifications — the app asks, they allow.
 
 ---
 
