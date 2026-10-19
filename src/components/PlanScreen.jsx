@@ -4,7 +4,7 @@ import { dayLabel, fromISO, toISO, todayISO } from '../lib/dates.js'
 import { db, payPlanned } from '../lib/db.js'
 import { categoryColor, categoryOf, rupees } from '../lib/format.js'
 import { usePlan } from '../lib/usePlan.js'
-import { BudgetCta, BudgetSheet } from './BudgetCard.jsx'
+import { BudgetBreakdown, BudgetCta, BudgetSheet } from './BudgetCard.jsx'
 import { BuySheet, GoalSheet, MoneySheet, PlannedSheet } from './PlanSheets.jsx'
 
 const ordinal = (n) => `${n}${[, 'st', 'nd', 'rd'][(n % 100 >> 3) ^ 1 && n % 10] || 'th'}`
@@ -109,11 +109,7 @@ export default function PlanScreen({ categories, showToast }) {
       </header>
 
       {plan.budget ? (
-        <div className="plan-strip">
-          <div><span>Free to spend</span><strong className={plan.budget.free < 0 ? 'up' : ''}>{rupees(plan.budget.free)}</strong></div>
-          <div><span>Kept aside</span><strong>{rupees(plan.budget.reserved)}</strong></div>
-          <div><span>Saved</span><strong>{rupees(plan.budget.saved)}</strong></div>
-        </div>
+        <BudgetBreakdown budget={plan.budget} today={today} onEdit={() => setSheet({ type: 'budget' })} />
       ) : (
         <BudgetCta onClick={() => setSheet({ type: 'budget' })} />
       )}

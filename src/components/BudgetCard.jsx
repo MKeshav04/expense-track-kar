@@ -7,17 +7,10 @@ import Sheet, { AmountField } from './Sheet.jsx'
 
 const monthName = (iso) => fromISO(iso).toLocaleDateString('en-IN', { month: 'long' })
 
-// The yellow card at the top of the home screen once a budget is set.
-export default function BudgetCard({ budget: b, today, bump, todayLine, noSpendButton, onEdit, go }) {
+// The yellow card at the top of the home screen once a budget is set. Kept deliberately simple:
+// what's left, and what's spent. The full breakdown lives on the Plan tab (BudgetBreakdown).
+export default function BudgetCard({ budget: b, today, bump, onEdit }) {
   const [info, setInfo] = useState(false)
-  const pct = (x) => (b.budget > 0 ? Math.max(0, Math.min(100, (x / b.budget) * 100)) : 0)
-  const parts = b.over
-    ? [{ key: 'spent', w: 100 }]
-    : [
-        { key: 'spent', w: pct(b.spent) },
-        { key: 'saved', w: pct(b.saved) },
-        { key: 'kept', w: pct(Math.min(b.reserved, Math.max(0, b.left))) },
-      ]
 
   return (
     <section className={b.over ? 'hero budget over' : 'hero budget'}>
@@ -43,47 +36,54 @@ export default function BudgetCard({ budget: b, today, bump, todayLine, noSpendB
         </div>
       </div>
 
-      <div className="budget-bar" aria-hidden>
+      {info && (
+        <p className="budget-info">
+          Your budget is what you plan to spend this month. Every expense you log is taken off it, and so is
+          money you put into a savings goal. It starts fresh on the 1st. The full breakdown, with bills kept
+          aside and what's free per day, is on the 📌 Plan tab.
+        </p>
+      )}
+    </section>
+  )
+}
+
+// Full budget picture for the Plan tab: one bar and four plain rows.
+export function BudgetBreakdown({ budget: b, today, onEdit }) {
+  const pct = (x) => (b.budget > 0 ? Math.max(0, Math.min(100, (x / b.budget) * 100)) : 0)
+  const parts = b.over
+    ? [{ key: 'spent', w: 100 }]
+    : [
+        { key: 'spent', w: pct(b.spent) },
+        { key: 'saved', w: pct(b.saved) },
+        { key: 'kept', w: pct(Math.min(b.reserved, Math.max(0, b.left))) },
+      ]
+  const bills = `Kept for ${b.billsCount} ${b.billsCount === 1 ? 'bill' : 'bills'}`
+
+  return (
+    <section className="card breakdown-card">
+      <div className="card-head">
+        <h2>💰 {monthName(today)} budget · {rupees(b.budget)}</h2>
+        <button className="btn small" onClick={onEdit}>Edit</button>
+      </div>
+      <div className="budget-bar on-card" aria-hidden>
         {parts.map((p) => (
           <span key={p.key} className={`seg-${p.key}`} style={{ width: `${p.w}%` }} />
         ))}
       </div>
-
-      {(b.reserved > 0 || b.saved > 0) && (
-        <div className="budget-notes">
-          {b.reserved > 0 && (
-            <button onClick={() => go('plan')}>
-              <i className="dot dot-kept" /> {rupees(b.reserved)} kept for {b.billsCount} {b.billsCount === 1 ? 'bill' : 'bills'}
-            </button>
-          )}
-          {b.saved > 0 && (
-            <button onClick={() => go('plan')}>
-              <i className="dot dot-saved" /> {rupees(b.saved)} saved
-            </button>
-          )}
-        </div>
-      )}
-
-      {!b.over && (
-        <div className="budget-free">
-          {b.free > 0
-            ? `${b.reserved > 0 ? `${rupees(b.free)} free after bills · ` : ''}≈ ${rupees(b.perDay)}/day for the next ${b.daysLeft} ${b.daysLeft === 1 ? 'day' : 'days'}`
-            : `Your bills need ${rupees(-b.free)} more than what's left`}
-        </div>
-      )}
-
-      {info && (
-        <p className="budget-info">
-          Your budget is what you plan to spend this month. Every expense you log is taken off it, and so is
-          money you put into a savings goal. Bills and to-buys on the 📌 Plan tab are kept aside, so “free” is
-          what you can really spend. It starts fresh on the 1st.
+      <ul className="breakdown">
+        <li><i className="dot dot-spent" /> Spent <b>{rupees(b.spent)}</b></li>
+        {b.saved > 0 && <li><i className="dot dot-saved" /> Saved to goals <b>{rupees(b.saved)}</b></li>}
+        {b.reserved > 0 && <li><i className="dot dot-kept" /> {bills} <b>{rupees(b.reserved)}</b></li>}
+        <li className="breakdown-total">
+          <i className="dot dot-free" /> {b.free < 0 ? 'Short for your bills' : 'Free to spend'}
+          <b className={b.free < 0 ? 'up' : ''}>{rupees(Math.abs(b.free))}</b>
+        </li>
+      </ul>
+      {b.free > 0 && (
+        <p className="muted small breakdown-day">
+          ≈ {rupees(b.perDay)}/day for the next {b.daysLeft} {b.daysLeft === 1 ? 'day' : 'days'}
         </p>
       )}
-
-      <div className="budget-today">
-        <span>{todayLine}</span>
-        {noSpendButton}
-      </div>
     </section>
   )
 }

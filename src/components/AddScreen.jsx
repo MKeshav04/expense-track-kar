@@ -146,21 +146,7 @@ export default function AddScreen({ categories, keywords, onEdit, showToast, go,
       </header>
 
       {plan?.budget ? (
-        <BudgetCard
-          budget={plan.budget}
-          today={today}
-          bump={bump}
-          go={go}
-          onEdit={() => setBudgetOpen(true)}
-          todayLine={`Today ${rupees(todayTotal)} · ${mood(todayTotal, usual, noSpendToday)}`}
-          noSpendButton={
-            todayTotal === 0 && (
-              <button className={noSpendToday ? 'nospend on' : 'nospend'} onClick={noSpend}>
-                {noSpendToday ? '✓ No-spend' : 'Spent nothing?'}
-              </button>
-            )
-          }
-        />
+        <BudgetCard budget={plan.budget} today={today} bump={bump} onEdit={() => setBudgetOpen(true)} />
       ) : (
         <>
           {plan && <BudgetCta onClick={() => setBudgetOpen(true)} />}
@@ -234,6 +220,16 @@ export default function AddScreen({ categories, keywords, onEdit, showToast, go,
         <button className="banner" onClick={() => go('settings')}>
           💾 {lastBackupAt ? "It's been a month since your last backup." : "You haven't backed up yet."} Tap to back up.
         </button>
+      )}
+
+      {/* With the budget card, today's total lives in the TODAY header; on an empty day, offer no-spend here. */}
+      {plan?.budget && todayTotal === 0 && shown.length > 0 && (
+        <div className="today-empty">
+          <span>{noSpendToday ? 'Today · no-spend day 🎉' : 'Today · nothing logged yet'}</span>
+          <button className={noSpendToday ? 'nospend on' : 'nospend'} onClick={noSpend}>
+            {noSpendToday ? '✓ No-spend' : 'Spent nothing?'}
+          </button>
+        </div>
       )}
 
       {shown.length === 0 ? (

@@ -595,23 +595,9 @@ h2 { font-size: 1.05rem; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.
 .hero.budget.over .seg-spent { background: #d92d20; }
 .seg-saved { background: #1fb5a0; }
 .seg-kept { background: repeating-linear-gradient(45deg, #ff5fa2 0 5px, #ff8cc0 5px 10px); }
-.budget-notes { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; position: relative; z-index: 1; }
-.budget-notes button {
-  border: 2px solid #1b1712;
-  background: #fffdf8;
-  color: #1b1712;
-  border-radius: 999px;
-  padding: 2px 10px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #1b1712; }
 .dot-kept { background: #ff5fa2; }
 .dot-saved { background: #1fb5a0; }
-.budget-free { font-weight: 700; font-size: 0.9rem; position: relative; z-index: 1; }
 .budget-info {
   background: rgb(255 255 255 / 0.6);
   border-radius: 12px;
@@ -619,19 +605,6 @@ h2 { font-size: 1.05rem; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.
   font-size: 0.85rem;
   font-weight: 500;
   margin: 8px 0 0;
-  position: relative;
-  z-index: 1;
-}
-.budget-today {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  padding-top: 9px;
-  border-top: 2px dashed rgb(27 23 18 / 0.35);
-  font-size: 0.85rem;
-  font-weight: 600;
   position: relative;
   z-index: 1;
 }
@@ -672,25 +645,6 @@ h2 { font-size: 1.05rem; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.
 /* ---------- Plan tab ---------- */
 .screen-head h1 { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.04em; margin: 4px 0 2px; }
 .screen-head p { margin: 0 0 14px; }
-.plan-strip {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.plan-strip div {
-  background: var(--card);
-  border: 2px solid var(--line);
-  border-radius: 14px;
-  padding: 8px 10px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 2px 2px 0 var(--shadow);
-}
-.plan-strip span { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-.plan-strip strong { font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-.plan-strip div:first-child { background: var(--sun); color: #1b1712; }
-.plan-strip div:first-child span { color: #1b1712; opacity: 0.7; }
 .card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
 .card-head h2 { margin: 0; }
 .pill { background: var(--ink); color: var(--paper); border-radius: 999px; padding: 2px 10px; font-size: 0.78rem; font-weight: 700; }
@@ -755,3 +709,38 @@ h2 { font-size: 1.05rem; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.
 .contrib-list li span { flex: 1; }
 .small-x { min-width: 30px; height: 30px; font-size: 1rem; }
 .receipt-sep { border-top: 2px dashed var(--muted); margin-top: 6px; padding-top: 8px !important; }
+
+/* Home: empty-today row (budget card shown) */
+.today-empty {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 18px 4px 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.today-empty .nospend { text-transform: none; letter-spacing: 0; border-color: var(--line); background: var(--card); color: var(--ink); }
+.today-empty .nospend.on { background: var(--ink); color: var(--paper); }
+
+/* Plan: budget breakdown card (theme-aware colours, unlike the yellow home card) */
+.budget-bar.on-card { border-color: var(--line); background: var(--soft); margin-top: 6px; }
+.budget-bar.on-card .seg-spent { background: var(--ink); }
+.breakdown { list-style: none; margin: 4px 0 0; padding: 0; }
+.breakdown li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 2px dashed var(--soft);
+  font-weight: 600;
+}
+.breakdown li b { margin-left: auto; font-weight: 800; font-variant-numeric: tabular-nums; }
+.breakdown-total { border-bottom: 0 !important; font-size: 1.05rem; }
+.breakdown-total b { font-size: 1.2rem; }
+.breakdown-day { margin: 2px 0 0; }
+.breakdown .dot { border-color: var(--line); }
+.dot-spent { background: var(--ink); }
+.dot-free { background: var(--soft); }

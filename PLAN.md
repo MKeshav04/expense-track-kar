@@ -60,7 +60,7 @@ On Groq's free tier this costs nothing at 3 people's usage.
 ## v1 — budget, bills, savings (built)
 | Feature | Detail |
 |---|---|
-| Monthly budget | Big "left this month" on the home card, spent of budget beside it, ≈ per day, ? explainer. |
+| Monthly budget | Home card: big "left this month" + spent of budget, ? explainer. Breakdown (saved, kept for bills, free per day) on the Plan tab. |
 | Coming up | Bills (monthly) + must-buys (one-time) kept aside until paid; typing "199 netflix" pays it. |
 | Savings goals | Any amount, any month, out of that month's budget; progress + months-to-go; "Bought it". |
 | Summary + AI | Monthly receipt and AI summary include budget, saved and left. |
@@ -89,7 +89,7 @@ cloud sync, multi-currency, CI, rate-limit storage, install guide with pictures.
 v0 + v1 (budget, bills, savings goals) are **live** at https://expense-track-kar.netlify.app (code: https://github.com/MKeshav04/expense-track-kar).
 Adding, editing, deleting with undo, keyword learning, streaks, summaries, settings, backup, offline,
 and both AI features (Groq) all work, including on the live site.
-The app is called **Kharcha** (full name "Kharcha — Expense Track-kar"). Full details: [README.md](README.md).
+The app is called **Kharcha** (full name "Kharcha — Expense Track-kar"). Full details: [DOCS.md](DOCS.md).
 
 ## Running it
 ```
