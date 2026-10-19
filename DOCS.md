@@ -242,13 +242,18 @@ A backup restores on any phone (entries are merged, nothing is deleted).
 
 It's a website that installs like an app: own icon, full screen, works offline.
 
-**Android (Chrome):** open the link → tap **Install** (or **⋮ → Install app**) → it appears on the
-home screen and in the app drawer.
+| Device | How |
+|---|---|
+| **iPhone / iPad** — Safari or Chrome | **Share (□↑)** (bottom in Safari, top right in Chrome) → **Add to Home Screen** → **Add** |
+| **Android** — Chrome | **Install** banner, or **⋮ → Install app** |
+| **Mac** — Safari (macOS Sonoma or newer) | **File → Add to Dock** |
+| **Mac / Windows** — Chrome or Edge | Install icon at the right of the address bar, or **⋮ → Cast, save, and share → Install page as app** |
 
-**iPhone (must be Safari):** open the link → **Share ↑** → **Add to Home Screen** → **Add**.
+Where the browser supports it (Chrome/Edge on Android, Mac, Windows), **Settings → App** also has a
+one-tap **Install app** button, and it always shows the steps for the device you're on.
 
 After that, always open it from the **icon**, not the browser. The browser tab and the installed
-app keep separate data.
+app keep **separate data** (to move entries: Back up in one, Restore in the other).
 
 ---
 
@@ -256,6 +261,13 @@ app keep separate data.
 
 - **Offline:** the app's code, styles, icons and font are stored on the phone. The page itself is
   loaded fresh whenever you're online (waits up to 4 seconds), and the last copy is used offline.
+  Code files are kept per version (up to 90 days), so a saved page always finds the exact code it was
+  built with, even right after an update. The first visit is enough to work offline.
+- **Self-repair:** if the app hasn't started 10 seconds after loading (a phone stuck on a broken old
+  copy), it clears its offline copy once and reloads. Entries are never touched (they live in
+  IndexedDB, not in the offline copy). It runs at most once per session, so it can't loop.
+- **Settings → App** shows the **version** (build date · commit) so you can compare devices, and
+  **Get latest version** does the same clean-up by hand.
 - **Updates:** push to GitHub → Netlify redeploys → next time you open the app it fetches the new
   version. Fully close and reopen once (sometimes twice) to see it. No reinstall, data untouched.
 - **Exception — name or icon changes:** Android picks them up on its own within about a day;
@@ -270,8 +282,8 @@ Keep it that way by following these rules:
 |---|---|
 | **Never rename** `'expense-tracker'` in `src/lib/db.js` / `src/lib/backup.js` | That's where every phone's data lives; renaming = empty app, old backups won't restore |
 | **New data fields:** just start writing them; old entries without the field must still work | Saved entries are never rewritten on their own |
-| **New table or index:** add `db.version(2).stores({...})` (keep `version(1)`) plus an `.upgrade()` if old rows need filling in | Dexie upgrades each phone's database in place on next open, data kept |
-| **Never delete a table or remove version(1)** | Phones on the old version could lose data |
+| **New table or index:** add the next `db.version(N).stores({...})` (keep all earlier versions; the app is at 2) plus an `.upgrade()` if old rows need filling in | Dexie upgrades each phone's database in place on next open, data kept |
+| **Never delete a table or remove an old version** | Phones on the old version could lose data |
 | **Keep the Netlify link the same** (`expense-track-kar.netlify.app`) | The installed app belongs to that address; a new address = a new, empty app |
 | **Avoid changing `name`, `short_name`, icons** | iPhone never updates them without a reinstall |
 | **Test with real data before pushing:** back up from your phone, `npm run dev`, restore the backup there, check | Catches anything that would break existing entries |
@@ -330,9 +342,12 @@ changing them makes every phone lose its entries and old backups stop restoring.
 3. Every push to `main` deploys automatically.
 
 `netlify.toml` also:
-- rewrites unknown paths to `index.html`, so refreshing never shows "Page not found"
+- returns a real 404 for missing `/assets/*` files (an old version's code) instead of the page —
+  serving the page as JavaScript is what causes blank screens;
+- rewrites other unknown paths to `index.html`, so refreshing never shows "Page not found"
   (safe for the AI, because Netlify runs functions before redirect rules);
-- tells browsers to always re-check `sw.js`, so updates reach installed phones.
+- tells browsers to always re-check the page and `sw.js`, so updates reach installed phones, and to
+  cache `/assets/*` for a year (their names change with every build).
 
 Don't use drag-and-drop deploys — they skip the AI function.
 
@@ -346,7 +361,7 @@ netlify/functions/ai.mjs      Netlify Function → serves api/ai.js at /api/ai
 netlify.toml                  Netlify build, refresh fallback, headers
 vite.config.js                Vite + PWA (manifest, offline caching) + local /api/ai
 index.html                    Page shell; applies the saved theme before first paint
-public/                       Icons and favicon
+public/                       Icons, favicon, 404.html
 scripts/make-icons.mjs        Generates the PNG icons (no dependencies)
 src/
   main.jsx                    Entry; loads the font; warms the offline page copy
@@ -361,7 +376,8 @@ src/
     EntryList.jsx             Entries grouped by day (or flat), AI suggestion chips
     EditSheet.jsx             Edit/delete one entry
     SummaryScreen.jsx         Receipt, fun facts, categories, charts, AI summary, share
-    SettingsScreen.jsx        Theme, categories, backup/restore, data info
+    SettingsScreen.jsx        Theme, app, categories, backup/restore, data info
+    AppSection.jsx            Settings → App: install button/steps, version, get latest version
   lib/
     parse.js                  The text parser (pure functions) — amount, date, category, note
     parse.test.js             Parser tests
@@ -376,6 +392,7 @@ src/
     format.js                 ₹ formatting, category colours
     seed.js                   Default categories and seeded merchant keywords
     theme.js                  Light/dark switching
+    pwa.js                    Install prompt, platform detection, offline warm-up, get latest version
 ```
 
 **Stack:** React 19 · Vite 8 · Dexie 4 (IndexedDB) · vite-plugin-pwa (Workbox) · Vitest ·
@@ -414,12 +431,14 @@ Every entry keeps `rawText`, so old entries can be re-parsed if the parser impro
 
 | Problem | Fix |
 |---|---|
-| Phone shows an old version | Fully close the app and reopen (twice if needed). Clearing the browser cache doesn't help — and **don't** "clear site data", it deletes entries. |
+| Phone shows an old version, a blank screen, or won't load | Settings → App → **Get latest version** (entries are kept). If you can't reach Settings, fully close and reopen the app: after 10 seconds it repairs itself. Clearing the browser cache doesn't help — and **don't** "clear site data", it deletes entries. |
+| Not sure which version a phone has | Settings → App shows the version; compare it with another device. |
 | "AI is not set up yet" | `GROQ_API_KEY` missing — in `.env.local` locally (restart dev server) or in Netlify env vars (then redeploy). |
 | "The server API key is invalid" | Re-copy the key from the Groq console. |
 | "The AI model … isn't available" | Groq retired the model. Pick a current one from Groq's models page and set `GROQ_MODEL`. |
 | "Too many AI requests" | Groq free-tier rate limit; wait a minute. |
-| No install option on iPhone | Use Safari, not Chrome. |
+| No install option | iPhone: Share (□↑) → Add to Home Screen (Safari or Chrome). Mac Safari: File → Add to Dock (macOS Sonoma+). Chrome/Edge: install icon in the address bar. |
+| Installed app is empty but the browser has my entries | They keep separate data. Back up in the browser, then Restore inside the installed app. |
 | Entries missing after switching browser/app | Browser tab and installed app have separate data. Back up from one, restore in the other. |
 | "Permanent storage: not granted" | Install the app to the home screen; Chrome usually grants it then. |
 
@@ -451,6 +470,10 @@ Every entry keeps `rawText`, so old entries can be re-parsed if the parser impro
 - **Page loaded network-first** — the first version precached the page, so Netlify-side changes
   never reached installed phones.
 - **Always opens on Add** — logging should be one tap away.
+- **Code cached per version + self-repair** — phones that opened an older version could end up with
+  a saved page pointing at code that no longer existed (Netlify only keeps the current deploy, and
+  its refresh rule answered with the page instead of a 404). Code is now cached per version, missing
+  code is a real 404, and the app repairs itself once if it fails to start.
 - **Streak 🔥 and no-spend days** — expense apps usually get abandoned around day 10, and a tracker
   with gaps is useless. The streak makes the daily habit visible and a little rewarding; marking a
   no-spend day keeps it alive, so an honest "spent nothing today" never breaks it.

@@ -744,3 +744,9 @@ h2 { font-size: 1.05rem; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.
 .breakdown .dot { border-color: var(--line); }
 .dot-spent { background: var(--ink); }
 .dot-free { background: var(--soft); }
+
+/* Settings → App */
+.install-btn { margin: 4px 0 6px; }
+.steps { margin: 6px 0 10px; padding-left: 20px; font-size: 0.88rem; }
+.steps li { margin: 3px 0; }
+.app-version { margin-top: 10px; }

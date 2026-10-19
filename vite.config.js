@@ -1,8 +1,9 @@
+import { execSync } from 'node:child_process'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// In local dev, serve api/ai.js at /api/ai the same way Vercel does in production.
+// In local dev, serve api/ai.js at /api/ai the same way the Netlify function does in production.
 function devApi() {
   return {
     name: 'dev-api',
@@ -35,7 +36,19 @@ export default defineConfig(({ mode }) => {
   // Server-only keys for api/ai.js in local dev. Never prefixed with VITE_, so never sent to the phone.
   for (const k of ['GROQ_API_KEY', 'GROQ_MODEL', 'ANTHROPIC_API_KEY']) if (env[k]) process.env[k] = env[k]
 
+  // Shown in Settings so you can tell which version a phone is running.
+  let commit = process.env.COMMIT_REF?.slice(0, 7) // set by Netlify builds
+  if (!commit) {
+    try {
+      commit = execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+    } catch {
+      commit = 'dev'
+    }
+  }
+  const version = `${new Date().toISOString().slice(0, 10)} · ${commit}`
+
   return {
+    define: { __APP_VERSION__: JSON.stringify(version) },
     plugins: [
       react(),
       devApi(),
@@ -60,9 +73,23 @@ export default defineConfig(({ mode }) => {
         workbox: {
           // The page itself is NOT precached: a precached index.html only refreshes when the
           // build changes, so server-side changes (e.g. Netlify settings) never reached phones.
-          globPatterns: ['**/*.{js,css,svg,png,woff2}'],
+          // Code (/assets/*) isn't precached either: precaching drops the previous version's files
+          // on update, which could leave a cached page pointing at files that no longer exist.
+          // Instead hashed files are kept in a runtime cache (see below), old versions included.
+          globPatterns: ['*.{svg,png}', 'registerSW.js'],
           navigateFallback: null,
           runtimeCaching: [
+            {
+              // Hashed build files never change, so cache-first is safe; keep old ones for a while
+              // so any cached page always finds the code it was built with.
+              urlPattern: ({ url }) => url.origin === self.location.origin && url.pathname.startsWith('/assets/'),
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'assets',
+                expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 90 },
+                cacheableResponse: { statuses: [200] },
+              },
+            },
             {
               // Online: always the latest page. Offline: the last copy we saw.
               urlPattern: ({ request, url }) =>

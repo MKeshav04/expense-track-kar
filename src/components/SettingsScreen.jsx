@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { exportCSV, exportJSON, importJSON } from '../lib/backup.js'
 import { db, getSetting } from '../lib/db.js'
 import { categoryColor } from '../lib/format.js'
+import AppSection from './AppSection.jsx'
 
 function slug(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'cat'
@@ -124,6 +125,8 @@ export default function SettingsScreen({ categories, showToast, theme, toggleThe
           </button>
         </div>
       </section>
+
+      <AppSection showToast={showToast} />
 
       <section className="card">
         <h2>Categories</h2>

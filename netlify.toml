@@ -5,18 +5,41 @@
 [build.environment]
   NODE_VERSION = "22"
 
-# Refresh fix: any path that isn't a real file loads the app instead of a 404.
+# A build file that doesn't exist (e.g. from an old version) must be a real 404, never the page:
+# a page served as JavaScript is what leaves a blank screen. Listed first, so it wins.
+[[redirects]]
+  from = "/assets/*"
+  to = "/404.html"
+  status = 404
+
+# Refresh fix: any other path that isn't a real file loads the app instead of a 404.
 # Safe for /api/ai, because Netlify runs functions before redirect rules.
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# The service worker must always be re-checked so updates reach installed phones.
+# Always re-check the page and the service worker, so every phone picks up updates.
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
 [[headers]]
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache"
+
+# Build files have a content hash in their name, so they never change: cache them for a year.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/manifest.webmanifest"

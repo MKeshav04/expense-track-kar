@@ -15,7 +15,36 @@
           document.querySelector('meta[name="theme-color"]').setAttribute('content', '#fff4e0')
         }
       } catch (e) {}
+
+      // Self-repair: if the app hasn't started 10 seconds after loading (e.g. a phone stuck on an
+      // old offline copy), clear the offline copy once and reload. Entries are never touched:
+      // they live in IndexedDB, not in these caches. Runs at most once per session.
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          if (window.__kharchaStarted || !navigator.onLine) return
+          try {
+            if (sessionStorage.getItem('kharcha-repaired')) return
+            sessionStorage.setItem('kharcha-repaired', '1')
+          } catch (e) {
+            return
+          }
+          var jobs = []
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+            jobs.push(navigator.serviceWorker.getRegistrations().then(function (rs) {
+              return Promise.all(rs.map(function (r) { return r.unregister() }))
+            }))
+          }
+          if (window.caches) {
+            jobs.push(caches.keys().then(function (ks) {
+              return Promise.all(ks.map(function (k) { return caches.delete(k) }))
+            }))
+          }
+          Promise.all(jobs).then(reload, reload)
+          function reload() { location.reload() }
+        }, 10000)
+      })
     </script>
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="Kharcha" />

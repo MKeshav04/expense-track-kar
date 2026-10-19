@@ -14,11 +14,15 @@ monthly budget, and saving up for things. No accounts, no ads; your data never l
 - **AI** — suggests categories for messy entries and writes a short summary of your month.
 - **Works offline**, dark/light mode, backup to JSON/CSV, a 🔥 streak to keep the habit.
 
-## Install on your phone
-- **Android:** open the link in Chrome → ⋮ → **Install app**.
-- **iPhone:** open the link in Safari → Share → **Add to Home Screen**.
+## Install as an app
+- **iPhone:** Safari or Chrome → Share (□↑) → **Add to Home Screen**.
+- **Android:** Chrome → ⋮ → **Install app**.
+- **Mac:** Safari → File → **Add to Dock**, or Chrome → install icon in the address bar.
 
-Updates arrive by themselves; close and reopen the app. Back up now and then (Settings → Back up).
+The steps for your device are also in the app under Settings → App.
+
+Updates arrive by themselves; close and reopen the app. If a device ever looks stuck on an old
+version, Settings → App → **Get latest version** (entries are kept). Back up now and then.
 
 ## Run locally
 ```bash
