@@ -17,7 +17,8 @@ const CLAUDE_MODEL = 'claude-opus-5-5'
 const SUMMARY_SYSTEM = `You write spending summaries for a personal expense tracker used in India.
 You get a JSON object of facts that were already calculated. Write 3-4 short sentences in plain,
 friendly English addressed to the user as "you". Say where most of the money went, how it compares
-with the previous period when that is given, and end with one specific, practical observation drawn from the data
+with the previous period when that is given, how much of the monthly budget is left (or how far over)
+when a budget is given, and end with one specific, practical observation drawn from the data
 (for example a category that grew a lot, or a few big entries that explain the total).
 Only use numbers that appear in the facts, exactly as written - never add, subtract or compute new totals or percentages.
 If the facts have no comparedTo field, don't mention any comparison or missing data at all.

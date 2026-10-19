@@ -42,9 +42,15 @@ export default function EntryList({ entries, categories, onEdit, highlight = [],
                     <span className="entry-text">
                       <span className="entry-title">{e.note || cat.name}</span>
                       <span className="entry-sub">
-                        {flat
-                          ? [e.note ? cat.name : '', dayLabel(e.date, today)].filter(Boolean).join(' · ')
-                          : e.note ? cat.name : e.categoryId ? '' : 'Tap to pick a category'}
+                        {[
+                          flat
+                            ? [e.note ? cat.name : '', dayLabel(e.date, today)].filter(Boolean).join(' · ')
+                            : e.note ? cat.name : e.categoryId ? '' : 'Tap to pick a category',
+                          e.plannedId && '📌 planned',
+                          e.fromSavingsPaise && `🐷 ${rupees(e.fromSavingsPaise)} from savings`,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
                       </span>
                     </span>
                     <span className="entry-amount">{rupees(e.amountPaise)}</span>

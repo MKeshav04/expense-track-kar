@@ -2,7 +2,8 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { aiSummary } from '../lib/ai.js'
 import { fromISO, todayISO } from '../lib/dates.js'
-import { db } from '../lib/db.js'
+import { budgetCost, budgetFor, monthKey } from '../lib/budget.js'
+import { db, getSetting } from '../lib/db.js'
 import { categoryColor, categoryOf, percent, rupees } from '../lib/format.js'
 import {
   compareLabel, computeSummary, funFacts, periodLabel, periodRange, shiftAnchor, statsForAI, summaryText,
@@ -28,6 +29,15 @@ export default function SummaryScreen({ categories, onEdit }) {
     () => db.expenses.where('date').between(prevStart, end, true, true).toArray(),
     [prevStart, end],
   )
+  const monthInfo = useLiveQuery(async () => {
+    if (period !== 'month') return null
+    const [budgets, budgetDefault, contributions] = await Promise.all([
+      getSetting('budgets', {}),
+      getSetting('budgetDefault'),
+      db.contributions.where('date').between(start, end, true, true).toArray(),
+    ])
+    return { budgets, budgetDefault, contributions }
+  }, [period, start, end])
 
   if (!rows) return <div className="loading">Loading…</div>
 
@@ -39,6 +49,15 @@ export default function SummaryScreen({ categories, onEdit }) {
   const maxDay = Math.max(1, ...s.daily.map((d) => d.total))
   const change = s.prevTotal ? Math.round(((s.total - s.prevTotal) / s.prevTotal) * 100) : null
   const facts = funFacts(s, today)
+
+  // Budget for this month, if one was set: what's left after spending and saving.
+  let mb = null
+  const monthBudget = period === 'month' && monthInfo ? budgetFor(monthInfo, monthKey(start), monthKey(today)) : null
+  if (monthBudget != null) {
+    const spentFromBudget = s.rows.reduce((a, e) => a + budgetCost(e), 0)
+    const saved = monthInfo.contributions.reduce((a, c) => a + c.amountPaise, 0)
+    mb = { budget: monthBudget, saved, left: monthBudget - spentFromBudget - saved }
+  }
 
   function choosePeriod(p) {
     setPeriod(p)
@@ -54,7 +73,7 @@ export default function SummaryScreen({ categories, onEdit }) {
   async function runAI() {
     setAi((m) => ({ ...m, [key]: { loading: true } }))
     try {
-      const text = await aiSummary(statsForAI(s, categories, label))
+      const text = await aiSummary(statsForAI(s, categories, label, mb))
       setAi((m) => ({ ...m, [key]: { text } }))
     } catch (err) {
       setAi((m) => ({ ...m, [key]: { error: err.message } }))
@@ -116,6 +135,16 @@ export default function SummaryScreen({ categories, onEdit }) {
                 )}
               </span>
             </div>
+            {mb && (
+              <>
+                <div className="receipt-sep"><span>Budget</span><span>{rupees(mb.budget)}</span></div>
+                {mb.saved > 0 && <div><span>Saved to goals</span><span>{rupees(mb.saved)}</span></div>}
+                <div>
+                  <span>{mb.left < 0 ? 'Over budget' : 'Left'}</span>
+                  <b className={mb.left < 0 ? 'up' : 'down'}>{rupees(Math.abs(mb.left))}</b>
+                </div>
+              </>
+            )}
           </div>
           <div className="receipt-foot">{s.count ? '* thank you for tracking *' : '* nothing logged yet *'}</div>
         </section>

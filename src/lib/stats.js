@@ -105,7 +105,8 @@ export function compareLabel(period) {
 }
 
 // Pre-formatted facts for the AI. Every number in here was computed above.
-export function statsForAI(s, categories, label) {
+// mb: optional { budget, saved, left } for the month, all in paise.
+export function statsForAI(s, categories, label, mb = null) {
   const change = s.prevTotal ? Math.round(((s.total - s.prevTotal) / s.prevTotal) * 100) : null
   const hasPrev = s.prevTotal > 0
   return {
@@ -126,6 +127,13 @@ export function statsForAI(s, categories, label) {
         ...(hasPrev ? { sameSpanLastPeriod: rupees(c.prevTotal) } : {}),
       }
     }),
+    ...(mb
+      ? {
+          monthlyBudget: rupees(mb.budget),
+          savedToGoalsThisMonth: rupees(mb.saved),
+          [mb.left < 0 ? 'overBudgetBy' : 'leftOfBudget']: rupees(Math.abs(mb.left)),
+        }
+      : {}),
     biggestEntries: s.top.map((e) => ({
       amount: rupees(e.amountPaise),
       category: categoryOf(categories, e.categoryId).name,

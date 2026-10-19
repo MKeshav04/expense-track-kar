@@ -18,18 +18,19 @@ holding anyone's data.
 1. [What it does](#what-it-does)
 2. [How to type entries](#how-to-type-entries)
 3. [Categories and how it learns](#categories-and-how-it-learns)
-4. [Screens](#screens)
-5. [The AI parts](#the-ai-parts)
-6. [Where your data lives](#where-your-data-lives)
-7. [Install on a phone](#install-on-a-phone)
-8. [Updates and offline](#updates-and-offline) — including how to add features without anyone reinstalling
-9. [Run it on your computer](#run-it-on-your-computer)
-10. [Deploy on Netlify](#deploy-on-netlify)
-11. [Project structure](#project-structure)
-12. [How the code works](#how-the-code-works)
-13. [Troubleshooting](#troubleshooting)
-14. [Limits, on purpose](#limits-on-purpose)
-15. [Decisions log](#decisions-log)
+4. [Budget, bills and savings goals](#budget-bills-and-savings-goals)
+5. [Screens](#screens)
+6. [The AI parts](#the-ai-parts)
+7. [Where your data lives](#where-your-data-lives)
+8. [Install on a phone](#install-on-a-phone)
+9. [Updates and offline](#updates-and-offline) — including how to add features without anyone reinstalling
+10. [Run it on your computer](#run-it-on-your-computer)
+11. [Deploy on Netlify](#deploy-on-netlify)
+12. [Project structure](#project-structure)
+13. [How the code works](#how-the-code-works)
+14. [Troubleshooting](#troubleshooting)
+15. [Limits, on purpose](#limits-on-purpose)
+16. [Decisions log](#decisions-log)
 
 ---
 
@@ -37,6 +38,9 @@ holding anyone's data.
 
 | | |
 |---|---|
+| **Monthly budget** | Big "₹X left this month" at the top of the home screen, with what you've spent beside it and a ≈ per-day figure. |
+| **Coming up** | Bills (every month) and must-buys (one-time) kept aside from your budget until paid. Typing "199 netflix" marks Netflix paid. |
+| **Savings goals** | Save any amount, any month, towards something ("Headphones ₹2,000"). Shows progress and how many months to go. |
 | **Quick add** | One box at the top. Type like you'd text a friend; several entries per line work. |
 | **Instant and offline** | Saving never waits for the internet. The AI is only ever an extra. |
 | **Smart categories** | Understands category names, other words for them ("lunch", "auto", "rent"), common Indian apps (Swiggy, Blinkit, Uber, Myntra…), and small typos. Learns from your corrections. |
@@ -112,15 +116,54 @@ It then learns:
 
 ---
 
+## Budget, bills and savings goals
+
+One monthly budget; three things take from it:
+
+| | Counts against the budget | Example |
+|---|---|---|
+| **Spent** | Every entry you log | "150 food" |
+| **Saved** | Money you put into a savings goal that month | +₹500 into "Headphones" |
+| **Kept aside** | Unpaid bills and must-buys due this month (not spent yet, just reserved) | Netflix ₹199, gift ₹1,500 |
+
+- **Left this month** (the big number) = budget − spent − saved.
+- **Free** = left − kept aside. **Per day** = free ÷ days left in the month (rounded down).
+- Set the budget once ("Use this every month") and it repeats. Each month is frozen the first time
+  the app opens in it, so changing the budget later never rewrites past months.
+
+**Coming up (📌 Plan tab).** Each item is *every month* (rent, Netflix, recharge, optional due day)
+or *one-time* (a gift, shoes, optional "buy by" date). Tap **Paid ✓ / Bought ✓** and it's logged as
+an entry. Typing it on the Add screen works too: if every word of the item's name appears in what you
+type ("199 netflix", "299 jio recharge"), that entry pays the item, so nothing is counted twice.
+One-time items dated after this month show under **Later** and aren't kept aside yet.
+
+**Savings goals (📌 Plan tab).** "+ Add money" any amount; it comes out of that month's budget.
+The card shows saved / target, this month's amount, and an estimate ("about 2 more months at
+~₹600/month") from your average so far. **Bought it** logs the purchase as spending: the saved part is
+marked "🐷 from savings" and doesn't hit this month's budget again; anything above what you saved
+does. Deleting a goal returns its money to the budgets of the months it came from.
+
+---
+
 ## Screens
 
 ### ✍️ Add (always opens here)
 - Brand bar: 🔥 streak and the ☀️/🌙 theme button.
-- **Spent today** card: today's total, a mood line vs your usual day (average of the last 30 days,
-  shown once there are 3+ days of history), and **Spent nothing?** to mark a no-spend day.
+- **Budget card** (once a budget is set): left this month, spent of budget, a colour bar
+  (spent · saved · kept aside · free), what's kept/saved, free per day, a **?** that explains it, and
+  today's total with the mood line. Without a budget: a "Set a monthly budget" button and the
+  **Spent today** card instead.
+- Mood line: today vs your usual day (average of the last 30 days, shown once there are 3+ days of
+  history). **Spent nothing?** marks a no-spend day.
 - The input box (with a rotating example), quick-tap chips, then entries grouped by day with
   daily totals. **Show older entries** loads more.
 - A backup reminder appears once you have 20+ entries and haven't backed up in 30 days.
+
+### 📌 Plan
+- Free to spend · kept aside · saved, at a glance.
+- **Coming up:** unpaid items (overdue first), **Later**, and **Paid this month**. Tap an item to edit
+  or delete it.
+- **Savings goals:** progress, + Add money, Bought it. Tap a goal to edit it or take out a contribution.
 
 ### 🧾 Summary
 - **Today / Week / Month** (weeks start Monday) and ‹ › to move through past periods.
@@ -172,7 +215,14 @@ There is **no server database**. Netlify only serves the app's files.
 | `expenses` | `id`, `amountPaise` (₹150 → 15000, whole numbers so totals never drift), `categoryId`, `note`, `rawText` (exactly what you typed), `date` (local `YYYY-MM-DD`), `source` (rule / memory / llm / manual), `createdAt`, `updatedAt`, plus AI suggestion fields |
 | `categories` | `id`, `name`, `emoji`, `aliases`, `order`, `archived` |
 | `keywords` | learned `word` → `categoryId`, `count` |
-| `settings` | `lastBackupAt`, `noSpendDays` |
+| `planned` | bills and to-buys: `name`, `amountPaise`, `categoryId`, `repeat` (monthly / once), `dueDay` or `dueDate` |
+| `goals` | `name`, `emoji`, `targetPaise`, `doneAt` |
+| `contributions` | money put into a goal: `goalId`, `amountPaise`, `date` |
+| `settings` | `budgets` (per month), `budgetDefault`, `noSpendDays`, `lastBackupAt` |
+
+Expenses can also carry `plannedId` (it paid a planned item) and `fromSavingsPaise` (the part paid
+from a savings goal). The database is at version 2; version 1 phones upgrade in place on next open.
+Backups include the budget, plan and goals; older backups still restore.
 
 The theme choice is kept in `localStorage`.
 
@@ -235,7 +285,7 @@ Needs Node.js 22+.
 ```bash
 npm install
 npm run dev        # http://localhost:5173 — also prints a Network URL for your phone on the same Wi-Fi
-npm test           # 36 parser tests (Vitest)
+npm test           # 52 tests: parser + budget maths (Vitest)
 npm run build      # production build into dist/
 npm run preview    # serve the production build (with offline/service worker) on :4173
 ```
@@ -300,7 +350,11 @@ src/
   App.jsx                     Tabs, toast/undo, edit sheet, theme, AI retry on reconnect
   styles.css                  All styling (dark default + light theme)
   components/
-    AddScreen.jsx             Brand bar, today card, input, chips, entry list
+    AddScreen.jsx             Brand bar, budget/today card, input, chips, entry list
+    BudgetCard.jsx            Budget card, "set a budget" button, budget sheet
+    PlanScreen.jsx            Plan tab: coming up + savings goals
+    PlanSheets.jsx            Add/edit bill or to-buy, goal, add money, bought it
+    Sheet.jsx                 Shared bottom sheet + amount field
     EntryList.jsx             Entries grouped by day (or flat), AI suggestion chips
     EditSheet.jsx             Edit/delete one entry
     SummaryScreen.jsx         Receipt, fun facts, categories, charts, AI summary, share
@@ -310,6 +364,9 @@ src/
     parse.test.js             Parser tests
     db.js                     Dexie database, seeding, saving, keyword learning, no-spend days
     stats.js                  All summary maths, streak, usual day, fun facts, AI facts
+    budget.js                 Budget, planned items and goals maths (pure functions)
+    budget.test.js            Budget maths tests
+    usePlan.js                Live budget/plan/goals data for the current month
     ai.js                     Calls /api/ai; background category suggestions
     backup.js                 JSON/CSV export and JSON import
     dates.js                  Local-date helpers (YYYY-MM-DD)
@@ -340,6 +397,10 @@ uncategorised, `suggestMissing()` asks `/api/ai` in the background and stores a 
 **Summaries** ([src/lib/stats.js](src/lib/stats.js)) are computed from the entries in the period and
 the same span of the previous period. `statsForAI()` turns them into ready-formatted strings, so the
 AI only ever writes words around numbers it was given.
+
+**Budget maths** ([src/lib/budget.js](src/lib/budget.js)) is pure and tested: `computeBudget()`,
+`plannedStatus()`, `matchPlanned()`, `goalStats()`. `usePlan()` feeds it live data for the home card
+and the Plan tab. The monthly receipt on Summary shows budget / saved / left, and the AI gets them too.
 
 **Adding a parser rule:** add a failing case to `parse.test.js`, make it pass, run `npm test`.
 Every entry keeps `rawText`, so old entries can be re-parsed if the parser improves.
@@ -387,3 +448,7 @@ Every entry keeps `rawText`, so old entries can be re-parsed if the parser impro
 - **Page loaded network-first** — the first version precached the page, so Netlify-side changes
   never reached installed phones.
 - **Always opens on Add** — logging should be one tap away.
+- **Bills and to-buys merged into one "Coming up" list** — both are money you'll definitely spend;
+  the only difference is whether it repeats monthly.
+- **Savings come out of the budget; buying from savings doesn't hit it again** — every rupee is
+  counted once, and summaries still show the full purchase as spending.

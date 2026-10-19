@@ -57,9 +57,16 @@ On Groq's free tier this costs nothing at 3 people's usage.
 | Streak + no-spend day | 🔥 days in a row logged; "Spent nothing?" keeps the streak alive. |
 | Mood line + fun facts | Today vs your usual day; most repeated buy, biggest day, no-spend days. |
 
+## v1 — budget, bills, savings (built)
+| Feature | Detail |
+|---|---|
+| Monthly budget | Big "left this month" on the home card, spent of budget beside it, ≈ per day, ? explainer. |
+| Coming up | Bills (monthly) + must-buys (one-time) kept aside until paid; typing "199 netflix" pays it. |
+| Savings goals | Any amount, any month, out of that month's budget; progress + months-to-go; "Bought it". |
+| Summary + AI | Monthly receipt and AI summary include budget, saved and left. |
+
 ## Later, only if actually wanted
 Best candidates first:
-- One monthly budget with "₹X left · ₹Y/day safe to spend" on the Today card.
 - Split in the input: `1200 dinner /3` saves ₹400 (your share).
 - Search across all entries ("zomato": how often, how much).
 - Monthly budgets per category.
@@ -79,7 +86,7 @@ cloud sync, multi-currency, CI, rate-limit storage, install guide with pictures.
 - Money stored as whole paise (integers). Dates stored as local `YYYY-MM-DD`.
 
 ## Status (Oct 19, 2026)
-v0 is **live** at https://expense-track-kar.netlify.app (code: https://github.com/MKeshav04/expense-track-kar).
+v0 + v1 (budget, bills, savings goals) are **live** at https://expense-track-kar.netlify.app (code: https://github.com/MKeshav04/expense-track-kar).
 Adding, editing, deleting with undo, keyword learning, streaks, summaries, settings, backup, offline,
 and both AI features (Groq) all work, including on the live site.
 The app is called **Kharcha** (full name "Kharcha — Expense Track-kar"). Full details: [README.md](README.md).
@@ -88,7 +95,7 @@ The app is called **Kharcha** (full name "Kharcha — Expense Track-kar"). Full 
 ```
 npm install
 npm run dev        # local; also prints a Network URL to open on your phone over Wi-Fi
-npm test           # 36 parser tests
+npm test           # 52 tests (parser + budget maths)
 ```
 For AI locally: copy `.env.example` to `.env.local` and fill in `GROQ_API_KEY`, then restart `npm run dev`.
 Deploy (Netlify): push to GitHub → Netlify → Add new project → Import from Git → pick the repo

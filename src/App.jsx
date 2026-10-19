@@ -2,14 +2,17 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AddScreen from './components/AddScreen.jsx'
 import EditSheet from './components/EditSheet.jsx'
+import PlanScreen from './components/PlanScreen.jsx'
 import SettingsScreen from './components/SettingsScreen.jsx'
 import SummaryScreen from './components/SummaryScreen.jsx'
 import { suggestMissing } from './lib/ai.js'
-import { db, requestPersistence } from './lib/db.js'
+import { db, ensureMonthBudget, requestPersistence } from './lib/db.js'
+import { todayISO } from './lib/dates.js'
 import { getTheme, setTheme } from './lib/theme.js'
 
 const TABS = [
   { id: 'add', label: 'Add', icon: '✍️' },
+  { id: 'plan', label: 'Plan', icon: '📌' },
   { id: 'summary', label: 'Summary', icon: '🧾' },
   { id: 'settings', label: 'Settings', icon: '⚙️' },
 ]
@@ -42,6 +45,7 @@ export default function App() {
 
   useEffect(() => {
     requestPersistence()
+    ensureMonthBudget(todayISO().slice(0, 7))
   }, [])
 
   // Retry AI category suggestions whenever we come back online.
@@ -61,6 +65,7 @@ export default function App() {
     <div className="app">
       <main className="screen">
         {tab === 'add' && <AddScreen {...shared} />}
+        {tab === 'plan' && <PlanScreen {...shared} />}
         {tab === 'summary' && <SummaryScreen {...shared} />}
         {tab === 'settings' && <SettingsScreen {...shared} />}
       </main>

@@ -1,11 +1,14 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useMemo, useRef, useState } from 'react'
 import { suggestMissing } from '../lib/ai.js'
+import { matchPlanned } from '../lib/budget.js'
 import { addDays, dayLabel, daysBetween, todayISO } from '../lib/dates.js'
 import { addEntries, db, getSetting, toggleNoSpend } from '../lib/db.js'
 import { categoryColor, categoryOf, rupees } from '../lib/format.js'
 import { parseInput } from '../lib/parse.js'
 import { streak, usualDaily } from '../lib/stats.js'
+import { usePlan } from '../lib/usePlan.js'
+import BudgetCard, { BudgetCta, BudgetSheet } from './BudgetCard.jsx'
 import EntryList from './EntryList.jsx'
 
 const PLACEHOLDERS = ['150 food', '40 chai', '1.2k myntra', '60 auto yesterday', '499 recharge', '250 swiggy, 40 chai']
@@ -24,6 +27,7 @@ export default function AddScreen({ categories, keywords, onEdit, showToast, go,
   const [days, setDays] = useState(30)
   const [justAdded, setJustAdded] = useState([])
   const [bump, setBump] = useState(0)
+  const [budgetOpen, setBudgetOpen] = useState(false)
   const [placeholder] = useState(() => PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)])
   const inputRef = useRef()
 
@@ -35,6 +39,7 @@ export default function AddScreen({ categories, keywords, onEdit, showToast, go,
     [today, days],
     [],
   )
+  const plan = usePlan(today)
   const total = useLiveQuery(() => db.expenses.count(), [], 0)
   const lastBackupAt = useLiveQuery(() => getSetting('lastBackupAt'), [], null)
   const loggedDates = useLiveQuery(() => db.expenses.orderBy('date').uniqueKeys(), [], [])
@@ -65,6 +70,19 @@ export default function AddScreen({ categories, keywords, onEdit, showToast, go,
   }, [recent, categories])
 
   async function save(parsed) {
+    // "199 netflix" pays the Netflix bill on the Plan tab, so it isn't counted twice.
+    const paid = []
+    if (plan) {
+      let open = plan.planned
+      parsed = parsed.map((p) => {
+        const m = matchPlanned(p, open, today)
+        if (!m) return p
+        open = open.filter((x) => x.id !== m.id)
+        paid.push(m.name)
+        // Paying a bill: take the bill's category if the typed text didn't give one.
+        return p.categoryId ? { ...p, plannedId: m.id } : { ...p, plannedId: m.id, categoryId: m.categoryId, source: 'rule' }
+      })
+    }
     const rows = await addEntries(parsed)
     navigator.vibrate?.(12)
     setJustAdded(rows.map((r) => r.id))
@@ -75,7 +93,7 @@ export default function AddScreen({ categories, keywords, onEdit, showToast, go,
       rows.length > 1
         ? `Saved ${rows.length} entries · ${rupees(rows.reduce((s, r) => s + r.amountPaise, 0))}`
         : `${rupees(first.amountPaise)} · ${cat.emoji} ${cat.name} · ${dayLabel(first.date, today)}`
-    showToast(msg, () => db.expenses.bulkDelete(rows.map((r) => r.id)))
+    showToast(paid.length ? `${msg} · 📌 ${paid.join(', ')} paid` : msg, () => db.expenses.bulkDelete(rows.map((r) => r.id)))
     if (rows.some((r) => !r.categoryId)) suggestMissing(categories)
   }
 
@@ -127,21 +145,52 @@ export default function AddScreen({ categories, keywords, onEdit, showToast, go,
         </span>
       </header>
 
-      <section className="hero">
-        <div className="hero-top">
-          <span className="hero-label">Spent today</span>
-          {todayTotal === 0 && (
-            <button className={noSpendToday ? 'nospend on' : 'nospend'} onClick={noSpend}>
-              {noSpendToday ? '✓ No-spend day' : 'Spent nothing?'}
-            </button>
-          )}
-        </div>
-        <div key={bump} className="hero-amount">{rupees(todayTotal)}</div>
-        <div className="hero-mood">
-          {mood(todayTotal, usual, noSpendToday)}
-          {usual !== null && <span className="hero-usual"> · usual ≈ {rupees(Math.round(usual / 100) * 100)}</span>}
-        </div>
-      </section>
+      {plan?.budget ? (
+        <BudgetCard
+          budget={plan.budget}
+          today={today}
+          bump={bump}
+          go={go}
+          onEdit={() => setBudgetOpen(true)}
+          todayLine={`Today ${rupees(todayTotal)} · ${mood(todayTotal, usual, noSpendToday)}`}
+          noSpendButton={
+            todayTotal === 0 && (
+              <button className={noSpendToday ? 'nospend on' : 'nospend'} onClick={noSpend}>
+                {noSpendToday ? '✓ No-spend' : 'Spent nothing?'}
+              </button>
+            )
+          }
+        />
+      ) : (
+        <>
+          {plan && <BudgetCta onClick={() => setBudgetOpen(true)} />}
+          <section className="hero">
+            <div className="hero-top">
+              <span className="hero-label">Spent today</span>
+              {todayTotal === 0 && (
+                <button className={noSpendToday ? 'nospend on' : 'nospend'} onClick={noSpend}>
+                  {noSpendToday ? '✓ No-spend day' : 'Spent nothing?'}
+                </button>
+              )}
+            </div>
+            <div key={bump} className="hero-amount">{rupees(todayTotal)}</div>
+            <div className="hero-mood">
+              {mood(todayTotal, usual, noSpendToday)}
+              {usual !== null && <span className="hero-usual"> · usual ≈ {rupees(Math.round(usual / 100) * 100)}</span>}
+            </div>
+          </section>
+        </>
+      )}
+
+      {budgetOpen && plan && (
+        <BudgetSheet
+          current={plan.budgetPaise}
+          month={plan.month}
+          today={today}
+          onClose={() => setBudgetOpen(false)}
+          showToast={showToast}
+        />
+      )}
 
       <form onSubmit={submit} className="quick-add">
         <input
