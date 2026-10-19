@@ -1,4 +1,4 @@
-# Kharcha — the simplest expense tracker
+# Kharcha — the simplest expense track-kar
 
 Type `150 food`, press Add, done. Kharcha is a phone app (an installable web app, or PWA) for
 logging daily spending in rupees, seeing where the money went, and getting a short AI-written
@@ -230,6 +230,20 @@ Restart `npm run dev` after editing it. `.env.local` is git-ignored — never co
 The dev server serves `/api/ai` itself, so the AI works locally exactly like on Netlify.
 
 **Regenerate icons** (after changing colours in the script): `node scripts/make-icons.mjs`.
+
+**Renaming the app:**
+
+| What | Where |
+|---|---|
+| Name under the home-screen icon | `short_name` in [vite.config.js](vite.config.js) |
+| Full name (install prompt, app info) | `name` in [vite.config.js](vite.config.js) |
+| Browser tab title / iPhone icon label | `<title>` and `apple-mobile-web-app-title` in [index.html](index.html) |
+| Search/share description | `<meta name="description">` in [index.html](index.html) |
+| Wordmark at the top of the app | `kharcha` in [src/components/AddScreen.jsx](src/components/AddScreen.jsx) |
+| Text on the summary receipt | `KHARCHA ·` in [src/components/SummaryScreen.jsx](src/components/SummaryScreen.jsx) |
+
+Never rename `'expense-tracker'` in `src/lib/db.js` or `src/lib/backup.js` — those are internal IDs;
+changing them makes every phone lose its entries and old backups stop restoring.
 
 ---
 

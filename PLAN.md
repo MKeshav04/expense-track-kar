@@ -1,4 +1,4 @@
-# Expense Tracker — Revised Plan
+# Expense Track-kar — Revised Plan
 
 Updated Oct 19, 2026. Replaces the scope in `Expense Tracker App — Build Plan.pdf`; the PDF's
 reasoning (PWA, local-first, parser before AI) still holds.

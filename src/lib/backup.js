@@ -26,7 +26,7 @@ async function shareOrDownload(blob, filename) {
 
 export async function exportJSON() {
   const data = {
-    app: 'expense-tracker',
+    app: 'expense-tracker', // internal ID: keep, so old backups still restore
     version: 1,
     exportedAt: new Date().toISOString(),
     expenses: await db.expenses.toArray(),

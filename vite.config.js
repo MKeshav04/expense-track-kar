@@ -43,7 +43,7 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
         manifest: {
-          name: 'Kharcha — Expense Tracker',
+          name: 'Kharcha — Expense Track-kar',
           short_name: 'Kharcha',
           description: 'Type 150 food and you are done.',
           start_url: '/',

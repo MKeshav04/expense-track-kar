@@ -3,6 +3,7 @@ import { KEYWORD_MIN_COUNT, learnableWords } from './parse.js'
 import { DEFAULT_CATEGORIES, SEED_KEYWORDS } from './seed.js'
 
 // Everything lives in IndexedDB on this phone. Nothing here touches the network.
+// Internal name: never rename, or every phone loses its saved entries.
 export const db = new Dexie('expense-tracker')
 
 db.version(1).stores({
